@@ -1,0 +1,58 @@
+{
+  "name": "react-mcp-chatbot",
+  "version": "0.0.0",
+  "description": "A React MCP-style AI chatbot component with tool calling and backend integration",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup src/index.tsx --format esm --dts --clean",
+    "dev": "tsup src/index.tsx --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "dependencies": {
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.10",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  },
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "ai",
+    "chatbot",
+    "mcp",
+    "tool-calling",
+    "react-component"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TigranZakharyan/react-mcp-chatbot"
+  },
+  "homepage": "https://github.com/TigranZakharyan/react-mcp-chatbot#readme",
+  "bugs": {
+    "url": "https://github.com/TigranZakharyan/react-mcp-chatbot/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
