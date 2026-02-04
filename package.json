@@ -37,12 +37,20 @@
   },
   "license": "MIT",
   "keywords": [
-    "react",
     "ai",
     "chatbot",
-    "mcp",
+    "react",
+    "llm",
+    "ollama",
+    "ai-agent",
     "tool-calling",
-    "react-component"
+    "api-chatbot",
+    "react-chatbot",
+    "ai-tools",
+    "assistant",
+    "ai-ui",
+    "copilot",
+    "llm-agent"
   ],
   "repository": {
     "type": "git",

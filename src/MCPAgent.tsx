@@ -89,12 +89,13 @@ export function MCPAgent({
 
     try {
       const response = await agent.ask(userMessage);
-
+      console.log(response)
       setMessages(prev => [
         ...prev,
         { role: "ai", content: response }
       ]);
     } catch (err) {
+      console.log(err)
       setMessages(prev => [
         ...prev,
         { role: "ai", content: "⚠️ **Error:** Unable to fetch response." }

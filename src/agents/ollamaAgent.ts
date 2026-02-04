@@ -42,7 +42,7 @@ export class OllamaAgent extends Agent {
 
     if (decision.tool) {
       const tool = this.tools.find(t => t.name === decision.tool);
-
+      console.log(decision)
       if (tool) {
         const result = await tool.call(decision.arguments);
 
