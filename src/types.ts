@@ -58,15 +58,26 @@ type BaseUIProps = {
   buttonLabel?: string;
   placeholder?: string;
   borderRadius?: number;
-  providerURL: string;
 };
 
-type AgentProps = {
-  providerURL: string;
-  provider: "ollama";
+type BaseAgentProps = {
   model: string;
-  tools: MCPTool[]
-}
+  tools: MCPTool[];
+};
 
-export type MCPAgentProps = BaseUIProps & AgentProps
+// Ollama agent props
+export type OllamaAgentProps = BaseAgentProps & BaseUIProps & {
+  provider: "ollama";
+  providerURL: string;
+  apiKey?: never;
+};
 
+// Groq agent props
+export type GroqAgentProps = BaseAgentProps & BaseUIProps & {
+  provider: "groq";
+  apiKey: string;
+  providerURL?: never;
+};
+
+// Union of the two full props
+export type MCPAgentProps = OllamaAgentProps | GroqAgentProps;

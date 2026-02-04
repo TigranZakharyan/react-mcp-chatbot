@@ -76,6 +76,7 @@ Do NOT mention tools or APIs explicitly.
         system: MARKDOWN_SYSTEM_PROMPT,
         prompt: finalPrompt,
         stream: false,
+        temperature: 0
       }),
     });
 

@@ -3,9 +3,10 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { MCPAgentMessage, MCPAgentProps } from "./types";
 import { OllamaAgent } from "./agents/ollamaAgent";
-import SendIcon from './assets/send.svg'
+import SendIcon from "./assets/send.svg";
 import { TypingDots } from "./components/TypingDots";
 import { buildTokens } from "./helpers/buildTokens";
+import { GroqAgent } from "./agents/groqAgent";
 
 // ─────────────────────────────────────────────
 // System Prompt
@@ -21,26 +22,30 @@ Formatting rules:
 - Use \`inline code\` for variables or keys
 - Use code blocks only when necessary
 - Keep responses clean and readable
+
+Context rules:
+- Respond ONLY using the information provided in the context.
+- Do NOT generate or assume any information not present in the context.
+- If the answer cannot be found in the context, respond exactly: "No relevant information was found."
 `;
+
 
 // ─────────────────────────────────────────────
 // Main Component
 // ─────────────────────────────────────────────
-export function MCPAgent({
-  provider,
-  providerURL,
-  model,
-  tools = [],
-  title = "AI Assistant",
-  align = "right",
-  primaryColor = "#6366f1",
-  width = 600,
-  height = 900,
-  theme = "dark",
-  buttonLabel,
-  placeholder = "Message…",
-  borderRadius = 20,
-}: MCPAgentProps) {
+export function MCPAgent(props: MCPAgentProps) {
+  const {
+    title = "AI Assistant",
+    align = "right",
+    primaryColor = "#6366f1",
+    width = 600,
+    height = 900,
+    theme = "dark",
+    buttonLabel,
+    placeholder = "Message…",
+    borderRadius = 20,
+  } = props;
+
   const isDark = theme === "dark";
   const t = buildTokens(primaryColor, isDark);
 
@@ -69,13 +74,30 @@ export function MCPAgent({
     }
   }, [open]);
 
+  // ✅ FIXED: proper discriminated-union narrowing
   const agent = useMemo(() => {
-    if (provider === "ollama") {
-      return new OllamaAgent(model, providerURL, tools);
-    }
-    return new OllamaAgent(model, providerURL, tools);
-  }, [provider, model, providerURL, tools]);
+    if (props.provider === "ollama") {
+      return new OllamaAgent(
+        props.model,
+        props.providerURL,
+        props.tools
+      );
+    } 
 
+    return new GroqAgent(
+      props.apiKey,
+      props.model,
+      undefined,
+      props.tools
+    );
+
+  }, [
+    props.provider,
+    props.model,
+    props.providerURL,
+    props.apiKey,
+    props.tools,
+  ]);
 
   // ── Send logic ──
   async function send(): Promise<void> {
@@ -85,26 +107,22 @@ export function MCPAgent({
     setInput("");
     setLoading(true);
 
-    setMessages(prev => [...prev, { role: "user", content: userMessage }]);
+    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
 
     try {
       const response = await agent.ask(userMessage);
-      console.log(response)
-      setMessages(prev => [
-        ...prev,
-        { role: "ai", content: response }
-      ]);
+
+      setMessages((prev) => [...prev, { role: "ai", content: response }]);
     } catch (err) {
-      console.log(err)
-      setMessages(prev => [
+      console.log(err);
+      setMessages((prev) => [
         ...prev,
-        { role: "ai", content: "⚠️ **Error:** Unable to fetch response." }
+        { role: "ai", content: "⚠️ **Error:** Unable to fetch response." },
       ]);
     } finally {
       setLoading(false);
     }
   }
-
 
   const side = align === "right" ? { right: 24 } : { left: 24 };
 
