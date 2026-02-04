@@ -72,7 +72,7 @@
   <li>🌗 Dark & Light themes</li>
   <li>📐 Highly customizable</li>
   <li>📝 Markdown responses (tables, lists, code)</li>
-  <li>⚡ Ollama / local LLM support</li>
+  <li>⚡ Ollama / Groq / local LLM support</li>
   <li>🛠 Optional & validated tool parameters</li>
 </ul>
 
@@ -109,7 +109,7 @@ Markdown-formatted response
 <pre><code>import { MCPAgent } from "react-mcp-chatbot";
 
 &lt;MCPAgent
-  provider="ollama"
+  provider="ollama" // or "groq"
   providerURL="http://localhost:11434"
   model="llama3"
   tools={tools}
