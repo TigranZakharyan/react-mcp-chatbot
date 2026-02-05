@@ -79,5 +79,11 @@ export type GroqAgentProps = BaseAgentProps & BaseUIProps & {
   providerURL?: never;
 };
 
+export type OpenaiAgentProps = BaseAgentProps & BaseUIProps & {
+  provider: "openai";
+  apiKey: string;
+  providerURL?: never;
+};
+
 // Union of the two full props
-export type MCPAgentProps = OllamaAgentProps | GroqAgentProps;
+export type MCPAgentProps = OllamaAgentProps | GroqAgentProps | OpenaiAgentProps;
