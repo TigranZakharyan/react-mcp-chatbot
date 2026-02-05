@@ -1,6 +1,6 @@
 {
   "name": "react-mcp-chatbot",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A React MCP-style AI chatbot component with tool calling and backend integration",
   "type": "module",
   "main": "dist/index.js",
