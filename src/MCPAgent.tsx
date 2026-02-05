@@ -7,6 +7,7 @@ import SendIcon from "./assets/send.svg";
 import { TypingDots } from "./components/TypingDots";
 import { buildTokens } from "./helpers/buildTokens";
 import { GroqAgent } from "./agents/groqAgent";
+import { OpenAIAgent } from "./agents/openai";
 
 // ─────────────────────────────────────────────
 // System Prompt
@@ -82,7 +83,14 @@ export function MCPAgent(props: MCPAgentProps) {
         props.providerURL,
         props.tools
       );
-    } 
+    } else if(props.provider === 'openai') {
+      return new OpenAIAgent(
+        props.apiKey,
+        props.model,
+        undefined,
+        props.tools
+      );
+    }
 
     return new GroqAgent(
       props.apiKey,
