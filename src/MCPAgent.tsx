@@ -8,6 +8,7 @@ import { TypingDots } from "./components/TypingDots";
 import { buildTokens } from "./helpers/buildTokens";
 import { GroqAgent } from "./agents/groqAgent";
 import { OpenAIAgent } from "./agents/openai";
+import { GeminiAgent } from "./agents/geminiAgent";
 
 // ─────────────────────────────────────────────
 // System Prompt
@@ -85,6 +86,13 @@ export function MCPAgent(props: MCPAgentProps) {
       );
     } else if(props.provider === 'openai') {
       return new OpenAIAgent(
+        props.apiKey,
+        props.model,
+        undefined,
+        props.tools
+      );
+    } else if(props.provider === 'gemini') {
+      return new GeminiAgent(
         props.apiKey,
         props.model,
         undefined,

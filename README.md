@@ -72,7 +72,7 @@
   <li>🌗 Dark & Light themes</li>
   <li>📐 Highly customizable</li>
   <li>📝 Markdown responses (tables, lists, code)</li>
-  <li>⚡ Ollama / Groq / OpenAI</li>
+  <li>⚡ Ollama / Groq / OpenAI / Gemini</li>
   <li>🛠 Optional & validated tool parameters</li>
 </ul>
 
