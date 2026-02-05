@@ -1,4 +1,4 @@
-export type MCPProvider = "ollama" | "openai" | "groq" | "gemini";
+export type MCPProvider = "ollama" | "openai" | "groq" | "gemini" | "deepseek";
 
 export type MCPToolParameter = {
   type: "string" | "number" | "boolean";
@@ -91,5 +91,11 @@ export type GeminiAgentProps = BaseAgentProps & BaseUIProps & {
   providerURL?: never;
 };
 
+export type DeepSeekAgentProps = BaseAgentProps & BaseUIProps & {
+  provider: "deepseek";
+  apiKey: string;
+  providerURL?: never;
+};
+
 // Union of the two full props
-export type MCPAgentProps = OllamaAgentProps | GroqAgentProps | OpenaiAgentProps | GeminiAgentProps;
+export type MCPAgentProps = OllamaAgentProps | GroqAgentProps | OpenaiAgentProps | GeminiAgentProps | DeepSeekAgentProps;
