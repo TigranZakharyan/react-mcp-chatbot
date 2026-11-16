@@ -50,7 +50,7 @@
 
 Recorded with a local `llama3.1` via Ollama (no API key, no scripted replies). The assistant lists the processing orders, asks permission before the `POST`, cancels order 1002, and the table on the page updates. Its only knowledge of the backend is the three endpoint descriptions in [`demo/src/main.tsx`](./demo/src/main.tsx).
 
-**[Try it live](https://tigranzakharyan.github.io/react-mcp-chatbot/)** – bring your own API key (it stays in your browser tab), or run it locally. The demo ships an in-browser fake orders API, so no backend is needed:
+**[Try it live](https://tigranzakharyan.github.io/react-mcp-chatbot/)** – it opens in **Demo mode** (a simulated, rule-based model: no key, no cost, no AI), or switch to a real provider with your own API key (it stays in your browser tab). Ollama and the free tiers of providers like Groq and Gemini work too. You can also run it locally. The demo ships an in-browser fake orders API, so no backend is needed:
 
 ```bash
 git clone https://github.com/TigranZakharyan/react-mcp-chatbot

@@ -13,6 +13,7 @@ All notable changes are documented here. This project follows [Semantic Versioni
 - Controlled open state: `open` + `onOpenChange`, `showLauncher={false}` to use your own button, and `open()` / `close()` / `toggle()` on the ref.
 - Accessibility: launcher has an accessible label and `aria-expanded`; the window is a labelled dialog.
 - The demo site has a live "Make it yours" panel.
+- The demo site opens in a key-free "Demo mode" (a simulated rule-based model served in the browser) so visitors can try it without an AI account.
 
 ## 1.0.0
 

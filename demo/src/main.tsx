@@ -31,7 +31,9 @@ const endpoints: ApiEndpoint[] = [
   },
 ];
 
-const PROVIDERS: { id: ProviderName; label: string; model: string; keyless?: boolean }[] = [
+const PROVIDERS: { id: ProviderName; label: string; model: string; keyless?: boolean; demo?: boolean }[] = [
+  // Default: a simulated model that runs in the browser – no key, no cost (see mockLLM.ts)
+  { id: "openai-compatible", label: "Demo mode · free", model: "rule-based-demo", keyless: true, demo: true },
   { id: "openai", label: "OpenAI", model: "gpt-4o-mini" },
   { id: "anthropic", label: "Anthropic", model: "claude-haiku-4-5" },
   { id: "gemini", label: "Gemini", model: "gemini-2.5-flash" },
@@ -134,7 +136,11 @@ function App() {
 
       <section id="try">
         <h2>1 · Connect a model</h2>
-        <p className="lead">Your key stays in this tab's memory and is sent only to the provider you pick.</p>
+        <p className="lead">
+          Start with <b>Demo mode</b> – no key, no cost. For a real model, <b>Ollama</b> runs free on your machine, and
+          providers like <b>Groq</b> and <b>Gemini</b> offer free tiers (limits change – check theirs). Your key stays in
+          this tab's memory and is sent only to the provider you pick.
+        </p>
         <div className="card">
           <div className="setup">
             <div className="full">
@@ -153,7 +159,7 @@ function App() {
             </div>
             <div>
               <label>Model</label>
-              <input className="field mono" value={model} onChange={(e) => setModel(e.target.value)} />
+              <input className="field mono" value={model} disabled={provider.demo} onChange={(e) => setModel(e.target.value)} />
             </div>
             <div>
               <label>API key</label>
@@ -171,9 +177,10 @@ function App() {
           <div className="hint">
             <span className={`dot ${ready ? "ok" : "wait"}`} />
             {ready
-              ? "Ready – open the chat in the bottom-right corner."
+              ? "Ready – open the chat window."
               : "Paste an API key, or choose Ollama to run fully local."}
-            {provider.keyless && " Requires Ollama running with a tool-capable model (OLLAMA_ORIGINS must allow this origin)."}
+            {provider.demo && " Demo mode is a simulated model: simple rules, no AI, no key, no cost. It understands a few order questions."}
+            {provider.id === "ollama" && " Requires Ollama running with a tool-capable model (OLLAMA_ORIGINS must allow this origin)."}
           </div>
         </div>
       </section>
@@ -319,6 +326,8 @@ function App() {
       <MCPAgent
         key={provider.id /* fresh chat per provider */}
         provider={provider.id}
+        providerURL={provider.demo ? "/mock-llm" : undefined}
+        subtitle={provider.demo ? "Demo mode · simulated, no AI" : "Online"}
         model={model}
         apiKey={apiKey}
         title={title}

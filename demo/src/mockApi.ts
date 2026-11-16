@@ -1,3 +1,5 @@
+import { mockChatCompletion } from "./mockLLM";
+
 // A tiny in-browser "backend". It intercepts fetch("/api/...") so the demo runs
 // anywhere – including static hosting – with no server. In a real app you would
 // simply point `api.baseURL` at your actual backend and delete this file.
@@ -44,6 +46,10 @@ export function installMockApi() {
   window.fetch = async (input, init) => {
     const raw = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
     const url = new URL(raw, window.location.href);
+    // demo-mode "model": a fake OpenAI-style endpoint – no network, no key
+    if (url.pathname.includes("/mock-llm/") && url.pathname.endsWith("/chat/completions")) {
+      return reply(200, await mockChatCompletion(JSON.parse(String(init?.body ?? "{}"))));
+    }
     // only our own /api – LLM provider calls pass straight through
     if (url.origin === window.location.origin && /\/api\//.test(url.pathname)) {
       await new Promise((r) => setTimeout(r, 120)); // feel like a network
