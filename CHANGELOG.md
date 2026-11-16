@@ -2,6 +2,18 @@
 
 All notable changes are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Added – customization
+- `theme="auto"` follows the visitor's OS light/dark setting.
+- `colors` overrides any individual theme colour (`bg`, `aiBubble`, `userBubble`, `text`, …).
+- `fontFamily`, `className`, `style`, `borderRadius`, `zIndex`, `bottomOffset`, `sideOffset`.
+- `avatar` (emoji, image URL or React node), `launcherIcon`, `subtitle` (or `null` to hide), `welcomeIcon`, `welcomeTitle`, `welcomeMessage`.
+- `markdownComponents` to change how Markdown renders (custom links, tables, code blocks).
+- Controlled open state: `open` + `onOpenChange`, `showLauncher={false}` to use your own button, and `open()` / `close()` / `toggle()` on the ref.
+- Accessibility: launcher has an accessible label and `aria-expanded`; the window is a labelled dialog.
+- The demo site has a live "Make it yours" panel.
+
 ## 1.0.0
 
 First stable release. Public API (`MCPAgent`, `useChat`, `ChatEngine`, config types) is now covered by semantic versioning.

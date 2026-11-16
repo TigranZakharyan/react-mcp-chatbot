@@ -122,3 +122,10 @@ pre.code { margin: 0; background: #0b0e17; border: 1px solid var(--line); border
 .chip { font-size: 13.5px; padding: 9px 15px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); color: var(--muted); }
 footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
 @media (max-width: 640px) { .setup { grid-template-columns: 1fr; } .install { flex-wrap: wrap; } }
+
+.swatch { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; transition: .15s; }
+.swatch:hover { transform: scale(1.1); }
+.swatch.on { border-color: #fff; box-shadow: 0 0 0 2px var(--accent); }
+.swatch-input { width: 34px; height: 34px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: none; cursor: pointer; }
+
+@media (min-width: 1280px) { .page.chat-left { margin-left: auto; margin-right: max(24px, calc(50% - 640px)); } }

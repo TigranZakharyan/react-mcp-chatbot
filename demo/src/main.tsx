@@ -86,13 +86,20 @@ function App() {
   const [model, setModel] = useState(PROVIDERS[0].model);
   const [apiKey, setApiKey] = useState("");
   const [log, setLog] = useState<LogEntry[]>([]);
+  // live customizer
+  const [theme, setTheme] = useState<"dark" | "light" | "auto">("dark");
+  const [color, setColor] = useState("#7c5cff");
+  const [title, setTitle] = useState("Orders Assistant");
+  const [align, setAlign] = useState<"left" | "right">("right");
+  const [radius, setRadius] = useState(20);
+  const [avatar, setAvatar] = useState("🤖");
   const { orders, flash, refresh } = useOrders();
   const seq = useRef(0);
 
   const ready = provider.keyless || apiKey.trim().length > 0;
 
   return (
-    <div className="page">
+    <div className={`page ${align === "left" ? "chat-left" : ""}`}>
       <nav>
         <div className="logo"><i>🤖</i> react-mcp-chatbot</div>
         <div className="links">
@@ -216,6 +223,65 @@ function App() {
       </section>
 
       <section>
+        <h2>4 · Make it yours</h2>
+        <p className="lead">Every option below is a prop. The chat updates live.</p>
+        <div className="card">
+          <div className="setup">
+            <div>
+              <label>Theme</label>
+              <div className="provs">
+                {(["dark", "light", "auto"] as const).map((x) => (
+                  <button key={x} className={`prov ${theme === x ? "on" : ""}`} onClick={() => setTheme(x)}>{x}</button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label>Position</label>
+              <div className="provs">
+                {(["left", "right"] as const).map((x) => (
+                  <button key={x} className={`prov ${align === x ? "on" : ""}`} onClick={() => setAlign(x)}>{x}</button>
+                ))}
+              </div>
+            </div>
+            <div className="full">
+              <label>Accent colour</label>
+              <div className="provs">
+                {["#7c5cff", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#ec4899"].map((c) => (
+                  <button
+                    key={c}
+                    className={`swatch ${color === c ? "on" : ""}`}
+                    style={{ background: c }}
+                    onClick={() => setColor(c)}
+                    aria-label={`accent ${c}`}
+                  />
+                ))}
+                <input type="color" className="swatch-input" value={color} onChange={(e) => setColor(e.target.value)} aria-label="custom colour" />
+              </div>
+            </div>
+            <div>
+              <label>Title</label>
+              <input className="field" value={title} onChange={(e) => setTitle(e.target.value)} />
+            </div>
+            <div>
+              <label>Avatar (emoji or image URL)</label>
+              <input className="field" value={avatar} onChange={(e) => setAvatar(e.target.value)} />
+            </div>
+            <div className="full">
+              <label>Corner radius · {radius}px</label>
+              <input type="range" min={0} max={32} value={radius} onChange={(e) => setRadius(+e.target.value)} style={{ width: "100%", accentColor: color }} />
+            </div>
+          </div>
+          <pre className="code" style={{ marginTop: 16 }}>
+{"<"}<span className="f">MCPAgent</span>{"\n"}
+{"  "}theme=<span className="s">"{theme}"</span> primaryColor=<span className="s">"{color}"</span>{"\n"}
+{"  "}title=<span className="s">"{title}"</span> avatar=<span className="s">"{avatar}"</span>{"\n"}
+{"  "}align=<span className="s">"{align}"</span> borderRadius={"{"}{radius}{"}"} <span className="c">/* + colors, fontFamily, suggestions… */</span>{"\n"}
+{"/>"}
+          </pre>
+        </div>
+      </section>
+
+      <section>
         <h2>The entire integration</h2>
         <p className="lead">This is the code behind the chat on this page.</p>
         <pre className="code">
@@ -255,9 +321,12 @@ function App() {
         provider={provider.id}
         model={model}
         apiKey={apiKey}
-        title="Orders Assistant"
-        theme="dark"
-        primaryColor="#7c5cff"
+        title={title}
+        avatar={avatar}
+        theme={theme}
+        align={align}
+        borderRadius={radius}
+        primaryColor={color}
         width={410}
         height={580}
         defaultOpen={window.innerWidth >= 900}

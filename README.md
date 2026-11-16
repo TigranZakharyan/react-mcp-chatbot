@@ -191,6 +191,53 @@ const ref = useRef<MCPAgentHandle>(null);
 ref.current?.clear();
 ```
 
+## Customization
+
+Everything about the look is a prop – no CSS overrides needed.
+
+```tsx
+<MCPAgent
+  theme="auto"                      // "dark" (default) | "light" | "auto" (follows the OS)
+  primaryColor="#0ea5e9"
+  colors={{ aiBubble: "#f1f5f9", bg: "#ffffff" }}   // override any individual colour
+  title="Acme Support"
+  subtitle="Typically replies in a minute"          // null hides it
+  avatar="/logo.png"                // emoji, image URL or a React node
+  launcherIcon={<MyIcon />}
+  welcomeTitle="Need a hand?"
+  welcomeMessage="Ask about your orders."
+  suggestions={["Where is my order?", "Cancel order 1002"]}
+  fontFamily="Inter, sans-serif"
+  borderRadius={12}
+  align="left" bottomOffset={16} sideOffset={16}
+  markdownComponents={{ a: (p) => <a {...p} target="_blank" rel="noreferrer" /> }}
+/>
+```
+
+**Use your own button** – hide the launcher and control the window:
+
+```tsx
+const ref = useRef<MCPAgentHandle>(null);
+
+<button onClick={() => ref.current?.toggle()}>Ask AI</button>
+<MCPAgent ref={ref} showLauncher={false} {...config} />
+
+// or fully controlled
+<MCPAgent open={open} onOpenChange={setOpen} />
+```
+
+| Group | Props |
+| --- | --- |
+| Text | `title`, `subtitle`, `placeholder`, `buttonLabel`, `welcomeTitle`, `welcomeMessage`, `suggestions` |
+| Colours | `theme`, `primaryColor`, `colors` |
+| Shape & type | `width`, `height`, `borderRadius`, `fontFamily`, `className`, `style` |
+| Icons | `avatar`, `launcherIcon`, `welcomeIcon` |
+| Position | `align`, `bottomOffset`, `sideOffset`, `zIndex` |
+| Behaviour | `defaultOpen`, `open`, `onOpenChange`, `showLauncher`, `showClearButton` |
+| Content | `markdownComponents` |
+
+`colors` accepts: `bg`, `surface`, `surfaceHover`, `border`, `text`, `textMuted`, `accent`, `accentHover`, `userBubble`, `userBubbleText`, `aiBubble`, `aiBubbleText`, `inputBg`, `inputBorder`, `inputFocus`, `scrollbarThumb`, `shadow`, `codeBg`, `codeText`, `preBg`, `tableHeadBg`. Try it live in the [demo](https://tigranzakharyan.github.io/react-mcp-chatbot/).
+
 ## Headless usage
 
 ```tsx
@@ -218,7 +265,7 @@ const { messages, send, clear, stop, loading, status } = useChat({ provider, mod
 | `beforeToolCall` | `({name, args, method}) => boolean \| Promise<boolean>` – return `false` to block. Use it to confirm writes. |
 | `onToolCall`, `onError` | Observability hooks. |
 | `temperature`, `headers` | Passed to the provider. |
-| UI | `title`, `align`, `theme`, `primaryColor`, `width`, `height`, `borderRadius`, `placeholder`, `buttonLabel`, `showClearButton`, `defaultOpen`, `suggestions` (clickable starter prompts) |
+| UI | See [Customization](#customization) |
 
 ## Things to know about running fully client-side
 

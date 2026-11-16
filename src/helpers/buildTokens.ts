@@ -1,4 +1,4 @@
-interface ThemeTokens {
+export interface ThemeTokens {
   bg: string;
   surface: string;
   surfaceHover: string;
@@ -18,6 +18,10 @@ interface ThemeTokens {
   scrollbarThumb: string;
   shadow: string;
   headerGlow: string;
+  codeBg: string;
+  codeText: string;
+  preBg: string;
+  tableHeadBg: string;
 }
 
 export function buildTokens(accent: string, dark: boolean): ThemeTokens {
@@ -42,6 +46,10 @@ export function buildTokens(accent: string, dark: boolean): ThemeTokens {
       scrollbarThumb: "#2a2e3d",
       shadow: "0 24px 64px rgba(0,0,0,.45)",
       headerGlow: accent + "22",
+      codeBg: "#2a2e3d",
+      codeText: "#c9cdd8",
+      preBg: "#161923",
+      tableHeadBg: "#232736",
     };
   }
   return {
@@ -64,5 +72,9 @@ export function buildTokens(accent: string, dark: boolean): ThemeTokens {
     scrollbarThumb: "#d6d9e2",
     shadow: "0 24px 64px rgba(0,0,0,.12)",
     headerGlow: accent + "18",
+    codeBg: "#eef1f5",
+    codeText: "#e11d48",
+    preBg: "#f0f2f5",
+    tableHeadBg: "#eef1f5",
   };
 }

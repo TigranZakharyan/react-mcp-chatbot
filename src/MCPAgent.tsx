@@ -1,4 +1,4 @@
-import { forwardRef, useState, useRef, useEffect, useImperativeHandle } from "react";
+import { forwardRef, useState, useRef, useEffect, useImperativeHandle, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { MCPAgentHandle, MCPAgentProps } from "./types";
@@ -10,40 +10,86 @@ import { useChat } from "./useChat";
 // ─────────────────────────────────────────────
 // Main Component
 // ─────────────────────────────────────────────
+/** Follows `prefers-color-scheme` when theme="auto". */
+function useSystemDark(enabled: boolean) {
+  const [dark, setDark] = useState(true);
+  useEffect(() => {
+    if (!enabled || typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    setDark(mq.matches);
+    const on = (e: MediaQueryListEvent) => setDark(e.matches);
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, [enabled]);
+  return dark;
+}
+
+function renderAvatar(avatar: ReactNode) {
+  if (typeof avatar === "string" && /^(https?:|data:|\/|\.\/)/.test(avatar)) {
+    return <img src={avatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />;
+  }
+  return avatar;
+}
+
 export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAgent(props, ref) {
+  // UI props are pulled out here; whatever is left in `config` goes to the chat engine.
   const {
     title = "AI Assistant",
+    subtitle = "Online",
     align = "right",
     primaryColor = "#6366f1",
     width = 600,
     height = 900,
     theme = "dark",
+    colors,
     buttonLabel,
     placeholder = "Message…",
     borderRadius = 20,
-    showClearButton = true,
-    defaultOpen = false,
+    fontFamily = "'DM Sans', 'Segoe UI', system-ui, sans-serif",
+    className,
+    style: userStyle,
+    avatar = "🤖",
+    launcherIcon = "💬",
+    welcomeIcon = "👋",
+    welcomeTitle = "Hey there!",
+    welcomeMessage = "How can I help you today?",
     suggestions,
-  } = props;
-
-  const isDark = theme === "dark";
-  const t = buildTokens(primaryColor, isDark);
-
-  // Everything except UI props goes to the engine.
-  const {
-    title: _t, align: _a, primaryColor: _p, width: _w, height: _h, theme: _th,
-    buttonLabel: _b, placeholder: _ph, borderRadius: _br, showClearButton: _sc,
-    defaultOpen: _do, suggestions: _sg,
+    markdownComponents,
+    showClearButton = true,
+    bottomOffset = 24,
+    sideOffset = 24,
+    zIndex = 9998,
+    defaultOpen = false,
+    open: openProp,
+    onOpenChange,
+    showLauncher = true,
     ...config
   } = props;
+
+  const systemDark = useSystemDark(theme === "auto");
+  const isDark = theme === "auto" ? systemDark : theme === "dark";
+  const t = { ...buildTokens(primaryColor, isDark), ...colors };
+  const accent = t.accent;
+
   const chat = useChat(config);
   const { loading, status } = chat;
+
+  // Open state: controlled when `open` is passed, otherwise internal.
+  const [openState, setOpenState] = useState(defaultOpen);
+  const open = openProp ?? openState;
+  const setOpen = (v: boolean) => {
+    if (openProp === undefined) setOpenState(v);
+    onOpenChange?.(v);
+  };
 
   useImperativeHandle(ref, () => ({
     clear: chat.clear,
     send: chat.send,
     stop: chat.stop,
-  }), [chat.clear, chat.send, chat.stop]);
+    open: () => setOpen(true),
+    close: () => setOpen(false),
+    toggle: () => setOpen(!open),
+  }));
 
   // Tool-call bookkeeping messages are not shown.
   const messages = chat.messages.filter(
@@ -57,7 +103,6 @@ export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAg
     await chat.send(text);
   }
 
-  const [open, setOpen] = useState(defaultOpen);
   const [input, setInput] = useState("");
   const [animateIn, setAnimateIn] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -80,7 +125,8 @@ export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAg
     }
   }, [open]);
 
-  const side = align === "right" ? { right: 24 } : { left: 24 };
+  const side = align === "right" ? { right: sideOffset } : { left: sideOffset };
+  const windowBottom = bottomOffset + 60;
 
   // ── Injected global styles ──
   const styleTag = `
@@ -93,17 +139,17 @@ export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAg
     .mcp-btn-send:hover { background: ${t.accentHover} !important; transform: translateY(-1px); }
     .mcp-btn-send:active { transform: translateY(0); }
     .mcp-bubble-ai a { color: ${t.accent}; }
-    .mcp-bubble-ai code { background: ${isDark ? "#2a2e3d" : "#eef1f5"}; color: ${isDark ? "#c9cdd8" : "#e11d48"}; padding: 2px 6px; border-radius: 4px; font-size: 0.82em; }
-    .mcp-bubble-ai pre { background: ${isDark ? "#161923" : "#f0f2f5"}; padding: 10px 12px; border-radius: 8px; overflow-x: auto; font-size: 0.8em; margin: 6px 0; }
+    .mcp-bubble-ai code { background: ${t.codeBg}; color: ${t.codeText}; padding: 2px 6px; border-radius: 4px; font-size: 0.82em; }
+    .mcp-bubble-ai pre { background: ${t.preBg}; padding: 10px 12px; border-radius: 8px; overflow-x: auto; font-size: 0.8em; margin: 6px 0; }
     .mcp-bubble-ai table { border-collapse: collapse; width: 100%; font-size: 0.82em; margin: 6px 0; }
     .mcp-bubble-ai th, .mcp-bubble-ai td { border: 1px solid ${t.border}; padding: 5px 8px; text-align: left; }
-    .mcp-bubble-ai th { background: ${isDark ? "#232736" : "#eef1f5"}; font-weight: 600; }
+    .mcp-bubble-ai th { background: ${t.tableHeadBg}; font-weight: 600; }
     .mcp-bubble-ai p { margin: 4px 0; }
     .mcp-bubble-ai ul, .mcp-bubble-ai ol { margin: 4px 0; padding-left: 18px; }
     .mcp-bubble-ai li { margin: 2px 0; }
     .mcp-clear-btn:not(:disabled):hover { color: ${t.text} !important; background: ${t.surfaceHover} !important; }
     .mcp-chip:hover:not(:disabled) { border-color: ${t.accent} !important; color: ${t.accent} !important; transform: translateY(-1px); }
-    .mcp-float-btn:hover { transform: scale(1.08); box-shadow: 0 14px 36px ${primaryColor}55 !important; }
+    .mcp-float-btn:hover { transform: scale(1.08); box-shadow: 0 14px 36px ${accent}55 !important; }
     .mcp-float-btn:active { transform: scale(0.96); }
   `;
 
@@ -112,16 +158,19 @@ export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAg
       <style>{styleTag}</style>
 
       {/* ── Floating Toggle Button ── */}
+      {showLauncher && (
       <button
         className="mcp-float-btn"
-        onClick={() => setOpen((o) => !o)}
+        aria-label={open ? "Close chat" : "Open chat"}
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
         style={{
           position: "fixed",
-          bottom: 24,
+          bottom: bottomOffset,
           ...side,
           background: open
             ? (isDark ? t.surface : t.border)
-            : primaryColor,
+            : accent,
           color: open ? t.textMuted : "#fff",
           borderRadius: 999,
           padding: buttonLabel ? "13px 22px" : "16px 18px",
@@ -129,44 +178,51 @@ export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAg
           cursor: "pointer",
           boxShadow: open
             ? `0 8px 24px rgba(0,0,0,.15)`
-            : `0 12px 32px ${primaryColor}44`,
+            : `0 12px 32px ${accent}44`,
           fontWeight: 600,
           fontSize: 15,
           display: "flex",
           alignItems: "center",
           gap: 8,
           transition: "all .25s cubic-bezier(.4,0,.2,1)",
-          zIndex: 9999,
+          zIndex: zIndex + 1,
+          fontFamily,
           userSelect: "none",
         }}
       >
         <span style={{ fontSize: open ? 18 : 20, transition: "font-size .2s" }}>
-          {open ? "✕" : "💬"}
+          {open ? "✕" : launcherIcon}
         </span>
         {buttonLabel && !open && <span>{buttonLabel}</span>}
       </button>
+      )}
 
       {/* ── Chat Window ── */}
       <div
+        className={className}
+        role="dialog"
+        aria-label={title}
+        aria-hidden={!open}
         style={{
           position: "fixed",
-          bottom: 84,
+          bottom: windowBottom,
           ...side,
           // never wider/taller than the viewport (phones)
           width: `min(${width}px, calc(100vw - 32px))`,
-          height: `min(${height}px, calc(100vh - 110px))`,
+          height: `min(${height}px, calc(100vh - ${windowBottom + 26}px))`,
           background: t.bg,
           borderRadius,
           display: "flex",
           flexDirection: "column",
           boxShadow: t.shadow,
           overflow: "hidden",
-          zIndex: 9998,
+          zIndex,
           pointerEvents: open ? "auto" : "none",
           opacity: open && animateIn ? 1 : 0,
           transform: open && animateIn ? "translateY(0) scale(1)" : "translateY(18px) scale(.96)",
           transition: "opacity .3s cubic-bezier(.4,0,.2,1), transform .3s cubic-bezier(.4,0,.2,1)",
-          fontFamily: "'DM Sans', 'Segoe UI', system-ui, sans-serif",
+          fontFamily,
+          ...userStyle,
         }}
       >
         {/* Header */}
@@ -202,7 +258,7 @@ export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAg
               width: 34,
               height: 34,
               borderRadius: "50%",
-              background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}88)`,
+              background: `linear-gradient(135deg, ${accent}, ${accent}88)`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -210,27 +266,31 @@ export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAg
               flexShrink: 0,
               position: "relative",
               zIndex: 1,
+              overflow: "hidden",
+              color: "#fff",
             }}
           >
-            🤖
+            {renderAvatar(avatar)}
           </div>
           <div style={{ position: "relative", zIndex: 1 }}>
             <div style={{ color: t.text, fontWeight: 600, fontSize: 14, lineHeight: 1.3 }}>
               {title}
             </div>
+            {subtitle !== null && (
             <div style={{ color: t.textMuted, fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
-              <span
-                style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: "50%",
-                  background: "#22c55e",
-                  boxShadow: "0 0 6px #22c55e66",
-                  display: "inline-block",
-                }}
-              />
-              Online
-            </div>
+                <span
+                  style={{
+                    width: 7,
+                    height: 7,
+                    borderRadius: "50%",
+                    background: "#22c55e",
+                    boxShadow: "0 0 6px #22c55e66",
+                    display: "inline-block",
+                  }}
+                />
+                {subtitle}
+              </div>
+            )}
           </div>
           {showClearButton && (
             <button
@@ -293,19 +353,19 @@ export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAg
                   width: 48,
                   height: 48,
                   borderRadius: "50%",
-                  background: `linear-gradient(135deg, ${primaryColor}22, ${primaryColor}44)`,
+                  background: `linear-gradient(135deg, ${accent}22, ${accent}44)`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   fontSize: 22,
                 }}
               >
-                👋
+                {welcomeIcon}
               </div>
               <span style={{ fontWeight: 600, color: t.text, fontSize: 14 }}>
-                Hey there!
+                {welcomeTitle}
               </span>
-              <span>How can I help you today?</span>
+              <span>{welcomeMessage}</span>
               {suggestions && suggestions.length > 0 && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginTop: 6 }}>
                   {suggestions.map((q) => (
@@ -364,7 +424,7 @@ export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAg
                   {isUser ? (
                     m.content
                   ) : (
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                       {m.content}
                     </ReactMarkdown>
                   )}
@@ -385,7 +445,7 @@ export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAg
                     : "0 2px 10px rgba(0,0,0,.07)",
                 }}
               >
-                <TypingDots color={primaryColor} />
+                <TypingDots color={accent} />
                 {status && (
                   <span style={{ color: t.textMuted, fontSize: 11, marginLeft: 8 }}>{status}</span>
                 )}
@@ -431,7 +491,7 @@ export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAg
             onClick={send}
             disabled={loading || !input.trim()}
             style={{
-              background: loading || !input.trim() ? t.textMuted + "55" : primaryColor,
+              background: loading || !input.trim() ? t.textMuted + "55" : accent,
               color: "#fff",
               border: "none",
               borderRadius: 12,
