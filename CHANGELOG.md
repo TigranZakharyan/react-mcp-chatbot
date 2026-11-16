@@ -2,6 +2,11 @@
 
 All notable changes are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## 1.1.2
+
+### Changed
+- The package `homepage` now points to the documentation site: https://react-mcp-chatbot.netlify.app/
+
 ## 1.1.1
 
 ### Added
