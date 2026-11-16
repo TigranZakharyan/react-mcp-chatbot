@@ -11,7 +11,16 @@
     "types": ["vite/client"],
     "paths": {
       "react-mcp-chatbot": ["../src/index.tsx"],
-      "@demo/*": ["../demo/src/*"]
+      "@demo/*": ["../demo/src/*"],
+
+      // ../src and ../demo sit outside this folder. On a fresh checkout (Netlify) only
+      // docs/node_modules exists, so point their imports at it explicitly.
+      "react": ["./node_modules/@types/react"],
+      "react/*": ["./node_modules/@types/react/*"],
+      "react-dom": ["./node_modules/@types/react-dom"],
+      "react-dom/*": ["./node_modules/@types/react-dom/*"],
+      "react-markdown": ["./node_modules/react-markdown/index.d.ts"],
+      "remark-gfm": ["./node_modules/remark-gfm/index.d.ts"]
     }
   },
   "include": ["src", "../src", "../demo/src/mockApi.ts", "../demo/src/mockLLM.ts"]
