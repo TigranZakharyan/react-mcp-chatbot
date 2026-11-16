@@ -1,6 +1,6 @@
 {
   "name": "react-mcp-chatbot",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Client-side AI chatbot for React: describe your backend APIs and the model calls them. OpenAI, Anthropic, Gemini, DeepSeek, Groq, Ollama and more.",
   "type": "module",
   "main": "dist/index.cjs",
