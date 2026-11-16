@@ -22,6 +22,7 @@ First stable release. Public API (`MCPAgent`, `useChat`, `ChatEngine`, config ty
 - Gemini API key is sent in the `x-goog-api-key` header instead of the URL.
 
 ### Fixed
+- `require("react-mcp-chatbot")` works on every supported Node version: the CommonJS build bundles the ESM-only Markdown dependencies instead of `require()`-ing them (which throws on Node < 20.19).
 - Chat window no longer overflows narrow (phone) viewports.
 - `require()` previously pointed at an ES module.
 - The send icon is inlined, so bundlers no longer have to resolve a separate `.svg` asset.
