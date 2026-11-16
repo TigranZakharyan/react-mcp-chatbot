@@ -19,175 +19,137 @@
 <h1 align="center">🤖 React MCP Chatbot</h1>
 
 <p align="center">
-  <strong>AI-powered React chatbot with intelligent API tool calling</strong>
+  <strong>An AI chatbot that talks to your backend APIs – with no backend of its own</strong>
 </p>
 
 <p align="center">
-  A production-ready chat widget that understands user intent, selects the correct API,
-  executes it, and responds with clean Markdown-formatted answers.
+  Describe your existing REST endpoints. The model decides when to call them, the browser executes the calls, and the answer comes back as Markdown. History, system prompt and tool calling all live client-side.
 </p>
 
 <hr />
 
-<h2>✨ What is React MCP Chatbot?</h2>
+## Install
 
-<p>
-  <strong>React MCP Chatbot</strong> is a customizable AI chatbot component that connects
-  <strong>natural language user requests</strong> to <strong>real API calls</strong>
-  using an LLM-powered agent.
-</p>
+```bash
+npm install react-mcp-chatbot
+```
 
-<p>
-  Instead of writing complex conditional logic, you simply define
-  <strong>tools (API functions)</strong> —
-  the AI automatically decides <strong>when and how</strong> to call them.
-</p>
+## Quick start
 
-<p>
-  This makes it ideal for <strong>real-world, data-driven AI applications</strong>.
-</p>
+```tsx
+import { MCPAgent } from "react-mcp-chatbot";
 
-<hr />
+<MCPAgent
+  provider="openai"            // openai | anthropic | gemini | deepseek | groq | ollama | openrouter | mistral | xai | together | openai-compatible
+  model="gpt-4o-mini"
+  apiKey={...}
+  systemPrompt="You are the support assistant for Acme. Be concise."
+  api={{
+    baseURL: "https://api.acme.com",
+    headers: () => ({ Authorization: `Bearer ${getToken()}` }),
+    endpoints: [
+      {
+        name: "get_order",
+        description: "Look up an order by id",
+        path: "/orders/{id}",
+        parameters: { id: { type: "string", description: "Order id" } },
+      },
+      {
+        name: "cancel_order",
+        description: "Cancel an order",
+        method: "POST",
+        path: "/orders/{id}/cancel",
+        parameters: {
+          id: { type: "string" },
+          reason: { type: "string", optional: true },
+        },
+      },
+    ],
+  }}
+/>
+```
 
-<h2>🎥 Demo</h2>
+That is the whole integration. The model gets native function-calling schemas generated from your descriptions, picks endpoints, fills arguments, chains several calls if needed, reads the responses and answers. Tool errors (HTTP 4xx/5xx, missing arguments) are returned to the model so it can retry or explain.
 
-<p>
-  Example: user asks a question → AI decides → API is called → formatted response
-</p>
+Parameters go to `path` if `{name}` is in the path, otherwise `query` (GET/DELETE) or JSON `body` (POST/PUT/PATCH). Override per parameter with `in: "path" | "query" | "body" | "header"`.
 
-<p align="center">
-  <img src="./assets/demo.gif" alt="React MCP Chatbot Demo" width="800" />
-</p>
+### Already have an OpenAPI / Swagger spec?
 
-<hr />
+```tsx
+<MCPAgent
+  provider="gemini" model="gemini-2.5-flash" apiKey={...}
+  api={{
+    baseURL: "https://api.acme.com",
+    openapi: "https://api.acme.com/openapi.json", // URL or object
+    exclude: ["deleteUser"],                       // or include: [...]
+  }}
+/>
+```
 
-<h2>🚀 Features</h2>
+Every operation becomes a tool (`operationId` is the tool name, `summary`/`description` the description).
 
-<ul>
-  <li>🤖 AI-driven tool selection</li>
-  <li>🔌 Pluggable API tools</li>
-  <li>🧠 LLM-powered intent detection</li>
-  <li>🧩 Fully typed (TypeScript)</li>
-  <li>🎨 Modern floating chat UI</li>
-  <li>🌗 Dark & Light themes</li>
-  <li>📐 Highly customizable</li>
-  <li>📝 Markdown responses (tables, lists, code)</li>
-  <li>⚡ Ollama / Groq / OpenAI / Gemini / Deepseek</li>
-  <li>🛠 Optional & validated tool parameters</li>
-</ul>
+### Custom JS tools
 
-<hr />
+Still supported, and can be mixed with `api`:
 
-<h2>🧠 How It Works</h2>
+```tsx
+tools={[{
+  name: "get_cart",
+  description: "Current contents of the user's cart",
+  parameters: {},
+  call: async () => store.getState().cart,
+}]}
+```
 
-<pre><code>
-User Message
-     ↓
-LLM analyzes intent
-     ↓
-Tool decision (or no tool)
-     ↓
-API function executed
-     ↓
-Markdown-formatted response
-</code></pre>
+## History, system prompt, clearing
 
-<hr />
+- **History** is kept in the browser and sent with every request (last `maxHistoryMessages`, default 40, cut at a turn boundary so tool exchanges are never split).
+- **Persistence**: `persist` saves it to `localStorage` (`persist` or `persist="my-key"`). Off by default – on shared computers a saved chat can expose data returned by your API.
+- **System prompt**: `systemPrompt="..."` replaces the default.
+- **Clear**: built-in *Clear* button in the header (`showClearButton={false}` to hide), or via ref:
 
-<h2>📦 Installation</h2>
+```tsx
+const ref = useRef<MCPAgentHandle>(null);
+<MCPAgent ref={ref} ... />
+ref.current?.clear();
+```
 
-<pre><code>npm install react-mcp-chatbot</code></pre>
+## Headless usage
 
-<p>or</p>
+```tsx
+import { useChat } from "react-mcp-chatbot";
 
-<pre><code>yarn add react-mcp-chatbot</code></pre>
+const { messages, send, clear, stop, loading, status } = useChat({ provider, model, apiKey, api });
+```
 
-<hr />
+`ChatEngine` (the same core, no React) is exported too.
 
-<h2>⚡ Quick Start</h2>
+## Options
 
-<pre><code>import { MCPAgent } from "react-mcp-chatbot";
+| Prop | Description |
+| --- | --- |
+| `provider`, `model` | Required. |
+| `apiKey` | Required for hosted providers. |
+| `providerURL` | Override base URL (your proxy, Azure, vLLM, LM Studio…). Required for `openai-compatible`; default `http://localhost:11434` for `ollama`. |
+| `systemPrompt` | Instructions for the assistant. |
+| `api` | `{ baseURL, headers?, credentials?, endpoints?, openapi?, include?, exclude?, maxResponseChars? }` |
+| `tools` | Custom tools. |
+| `persist` | `boolean \| string` – save history to localStorage. |
+| `maxHistoryMessages` | Default 40. |
+| `maxToolRounds` | Max tool round-trips per message. Default 8. |
+| `maxToolResultChars` | Default 8000. Long API responses are truncated before going to the model. |
+| `beforeToolCall` | `({name, args, method}) => boolean \| Promise<boolean>` – return `false` to block. Use it to confirm writes. |
+| `onToolCall`, `onError` | Observability hooks. |
+| `temperature`, `headers` | Passed to the provider. |
+| UI | `title`, `align`, `theme`, `primaryColor`, `width`, `height`, `borderRadius`, `placeholder`, `buttonLabel`, `showClearButton` |
 
-&lt;MCPAgent
-  provider="ollama" // or "groq"
-  providerURL="http://localhost:11434"
-  model="llama3"
-  tools={tools}
-/&gt;
-</code></pre>
+## Things to know about running fully client-side
 
-<hr />
+- **API keys are visible to your users.** For anything public, point `providerURL` at a thin proxy that adds the key (or use per-user keys / a local model such as Ollama). The proxy needs no chatbot logic – it just forwards.
+- **The assistant acts with the user's own credentials.** Tool calls are plain `fetch` calls from the browser, so your backend's normal auth, CORS and permissions apply. Expose only the endpoints you want the model to reach, and use `beforeToolCall` to confirm mutating calls.
+- **CORS**: your backend must allow the page's origin; so must the LLM provider (OpenAI, Anthropic, Gemini, Groq work from browsers; for Ollama set `OLLAMA_ORIGINS`).
+- Models must support tool calling (e.g. Ollama `llama3.1`+, not every local model does).
 
-<h2>🛠 Defining API Tools</h2>
+## License
 
-<pre><code>import type { MCPTool } from "react-mcp-chatbot";
-
-const weatherTool: MCPTool = {
-  name: "get_weather",
-  description: "Get current weather for a city",
-  parameters: {
-    city: {
-      type: "string",
-      description: "City name",
-    },
-    units: {
-      type: "string",
-      optional: true,
-      description: "metric or imperial",
-    },
-  },
-  call: async ({ city, units }) =&gt; {
-    const res = await fetch(
-      `https://api.example.com/weather?q=${city}&units=${units ?? "metric"}`
-    );
-    return res.json();
-  },
-};
-</code></pre>
-
-<hr />
-
-<h2>🎨 UI Customization</h2>
-
-<pre><code>&lt;MCPAgent
-  title="Support Assistant"
-  align="right"
-  theme="dark"
-  width={420}
-  height={640}
-  primaryColor="#6366f1"
-  borderRadius={20}
-  placeholder="Ask me anything…"
-/&gt;
-</code></pre>
-
-<hr />
-
-<h2>🧭 Use Cases</h2>
-
-<ul>
-  <li>AI customer support bots</li>
-  <li>Internal admin dashboards</li>
-  <li>API copilots</li>
-  <li>SaaS onboarding assistants</li>
-  <li>Analytics chatbots</li>
-  <li>Developer tools</li>
-  <li>Portfolio projects</li>
-</ul>
-
-<hr />
-
-<h2>📜 License</h2>
-
-<p>
-  MIT © <a href="https://github.com/TigranZakharyan">Tigran Zakharyan</a>
-</p>
-
-<hr />
-
-<h2>⭐ Star the Project</h2>
-
-<p>
-  If this project helped you or inspired you, please consider giving it a star ⭐<br />
-  It helps a lot and motivates further development.
-</p>
+MIT © [Tigran Zakharyan](https://github.com/TigranZakharyan)

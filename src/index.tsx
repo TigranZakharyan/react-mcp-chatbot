@@ -1,2 +1,22 @@
 export { MCPAgent } from "./MCPAgent";
-export type { MCPTool, MCPAgentProps } from "./types";
+export { useChat } from "./useChat";
+export { ChatEngine } from "./core/engine";
+export { endpointsFromOpenAPI } from "./core/tools";
+export { createProvider, PROVIDER_URLS } from "./providers";
+export { DEFAULT_SYSTEM_PROMPT } from "./core/types";
+export type {
+  MCPTool,
+  MCPToolParameter,
+  MCPAgentProps,
+  MCPAgentHandle,
+  ApiConfig,
+  ApiEndpoint,
+  ApiParameter,
+  ChatConfig,
+  ChatMessage,
+  ChatState,
+  Provider,
+  ProviderConfig,
+  ProviderName,
+  ToolCall,
+} from "./types";

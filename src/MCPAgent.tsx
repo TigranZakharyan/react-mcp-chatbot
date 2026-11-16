@@ -1,42 +1,16 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { forwardRef, useState, useRef, useEffect, useImperativeHandle } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import type { MCPAgentMessage, MCPAgentProps } from "./types";
-import { OllamaAgent } from "./agents/ollamaAgent";
+import type { MCPAgentHandle, MCPAgentProps } from "./types";
 import SendIcon from "./assets/send.svg";
 import { TypingDots } from "./components/TypingDots";
 import { buildTokens } from "./helpers/buildTokens";
-import { GroqAgent } from "./agents/groqAgent";
-import { OpenAIAgent } from "./agents/openai";
-import { GeminiAgent } from "./agents/geminiAgent";
-import { DeepSeekAgent } from "./agents/deepseekAgent";
-
-// ─────────────────────────────────────────────
-// System Prompt
-// ─────────────────────────────────────────────
-export const MARKDOWN_SYSTEM_PROMPT = `
-You are a helpful AI assistant.
-
-Formatting rules:
-- Always respond in Markdown
-- Use bullet lists for multiple items
-- Use **bold** for important values
-- Use tables when comparing data
-- Use \`inline code\` for variables or keys
-- Use code blocks only when necessary
-- Keep responses clean and readable
-
-Context rules:
-- Respond ONLY using the information provided in the context.
-- Do NOT generate or assume any information not present in the context.
-- If the answer cannot be found in the context, respond exactly: "No relevant information was found."
-`;
-
+import { useChat } from "./useChat";
 
 // ─────────────────────────────────────────────
 // Main Component
 // ─────────────────────────────────────────────
-export function MCPAgent(props: MCPAgentProps) {
+export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAgent(props, ref) {
   const {
     title = "AI Assistant",
     align = "right",
@@ -47,15 +21,41 @@ export function MCPAgent(props: MCPAgentProps) {
     buttonLabel,
     placeholder = "Message…",
     borderRadius = 20,
+    showClearButton = true,
   } = props;
 
   const isDark = theme === "dark";
   const t = buildTokens(primaryColor, isDark);
 
+  // Everything except UI props goes to the engine.
+  const {
+    title: _t, align: _a, primaryColor: _p, width: _w, height: _h, theme: _th,
+    buttonLabel: _b, placeholder: _ph, borderRadius: _br, showClearButton: _sc,
+    ...config
+  } = props;
+  const chat = useChat(config);
+  const { loading, status } = chat;
+
+  useImperativeHandle(ref, () => ({
+    clear: chat.clear,
+    send: chat.send,
+    stop: chat.stop,
+  }), [chat.clear, chat.send, chat.stop]);
+
+  // Tool-call bookkeeping messages are not shown.
+  const messages = chat.messages.filter(
+    (m) => (m.role === "user" || m.role === "assistant") && m.content.trim()
+  );
+
+  async function send(): Promise<void> {
+    if (!input.trim() || loading) return;
+    const text = input;
+    setInput("");
+    await chat.send(text);
+  }
+
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<MCPAgentMessage[]>([]);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -76,77 +76,6 @@ export function MCPAgent(props: MCPAgentProps) {
       setAnimateIn(false);
     }
   }, [open]);
-
-  // ✅ FIXED: proper discriminated-union narrowing
-  const agent = useMemo(() => {
-    if (props.provider === "ollama") {
-      return new OllamaAgent(
-        props.model,
-        props.providerURL,
-        props.tools
-      );
-    } else if(props.provider === 'openai') {
-      return new OpenAIAgent(
-        props.apiKey,
-        props.model,
-        undefined,
-        props.tools
-      );
-    } else if(props.provider === 'gemini') {
-      return new GeminiAgent(
-        props.apiKey,
-        props.model,
-        undefined,
-        props.tools
-      );
-    } else if(props.provider === 'deepseek') {
-      return new DeepSeekAgent(
-        props.apiKey,
-        props.model,
-        undefined,
-        props.tools
-      );
-    }
-
-    return new GroqAgent(
-      props.apiKey,
-      props.model,
-      undefined,
-      props.tools
-    );
-
-  }, [
-    props.provider,
-    props.model,
-    props.providerURL,
-    props.apiKey,
-    props.tools,
-  ]);
-
-  // ── Send logic ──
-  async function send(): Promise<void> {
-    if (!input.trim() || loading) return;
-
-    const userMessage = input.trim();
-    setInput("");
-    setLoading(true);
-
-    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
-
-    try {
-      const response = await agent.ask(userMessage);
-
-      setMessages((prev) => [...prev, { role: "ai", content: response }]);
-    } catch (err) {
-      console.log(err);
-      setMessages((prev) => [
-        ...prev,
-        { role: "ai", content: "⚠️ **Error:** Unable to fetch response." },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   const side = align === "right" ? { right: 24 } : { left: 24 };
 
@@ -169,6 +98,7 @@ export function MCPAgent(props: MCPAgentProps) {
     .mcp-bubble-ai p { margin: 4px 0; }
     .mcp-bubble-ai ul, .mcp-bubble-ai ol { margin: 4px 0; padding-left: 18px; }
     .mcp-bubble-ai li { margin: 2px 0; }
+    .mcp-clear-btn:not(:disabled):hover { color: ${t.text} !important; background: ${t.surfaceHover} !important; }
     .mcp-float-btn:hover { transform: scale(1.08); box-shadow: 0 14px 36px ${primaryColor}55 !important; }
     .mcp-float-btn:active { transform: scale(0.96); }
   `;
@@ -297,6 +227,31 @@ export function MCPAgent(props: MCPAgentProps) {
               Online
             </div>
           </div>
+          {showClearButton && (
+            <button
+              className="mcp-clear-btn"
+              onClick={chat.clear}
+              disabled={chat.messages.length === 0}
+              title="Clear chat"
+              aria-label="Clear chat"
+              style={{
+                marginLeft: "auto",
+                position: "relative",
+                zIndex: 1,
+                background: "transparent",
+                border: `1px solid ${t.border}`,
+                color: t.textMuted,
+                borderRadius: 8,
+                padding: "5px 10px",
+                fontSize: 12,
+                cursor: chat.messages.length === 0 ? "default" : "pointer",
+                opacity: chat.messages.length === 0 ? 0.4 : 1,
+                fontFamily: "inherit",
+              }}
+            >
+              Clear
+            </button>
+          )}
         </div>
 
         {/* Messages */}
@@ -349,11 +304,11 @@ export function MCPAgent(props: MCPAgentProps) {
             </div>
           )}
 
-          {messages.map((m, i) => {
+          {messages.map((m) => {
             const isUser = m.role === "user";
             return (
               <div
-                key={i}
+                key={m.id}
                 style={{
                   display: "flex",
                   justifyContent: isUser ? "flex-end" : "flex-start",
@@ -401,6 +356,9 @@ export function MCPAgent(props: MCPAgentProps) {
                 }}
               >
                 <TypingDots color={primaryColor} />
+                {status && (
+                  <span style={{ color: t.textMuted, fontSize: 11, marginLeft: 8 }}>{status}</span>
+                )}
               </div>
             </div>
           )}
@@ -422,7 +380,7 @@ export function MCPAgent(props: MCPAgentProps) {
             className="mcp-input"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && send()}
+            onKeyDown={(e) => e.key === "Enter" && !e.nativeEvent.isComposing && send()}
             placeholder={placeholder}
             disabled={loading}
             style={{
@@ -471,4 +429,4 @@ export function MCPAgent(props: MCPAgentProps) {
       `}</style>
     </>
   );
-}
+});

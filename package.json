@@ -1,7 +1,7 @@
 {
   "name": "react-mcp-chatbot",
-  "version": "0.0.6",
-  "description": "A React MCP-style AI chatbot component with tool calling and backend integration",
+  "version": "0.1.0",
+  "description": "Client-side AI chatbot for React: describe your backend APIs and the model calls them. OpenAI, Anthropic, Gemini, DeepSeek, Groq, Ollama and more.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -50,7 +50,15 @@
     "assistant",
     "ai-ui",
     "copilot",
-    "llm-agent"
+    "llm-agent",
+    "openai",
+    "anthropic",
+    "gemini",
+    "deepseek",
+    "groq",
+    "openapi",
+    "function-calling",
+    "mcp"
   ],
   "repository": {
     "type": "git",
