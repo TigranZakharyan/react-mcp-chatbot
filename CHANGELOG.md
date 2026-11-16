@@ -2,6 +2,15 @@
 
 All notable changes are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## 1.1.1
+
+### Added
+- The `MCPThemeColors` type (the keys accepted by the `colors` prop) is now exported from the package entry.
+
+### Docs
+- New documentation website in `docs/`: guides, examples, API reference, FAQ, troubleshooting, a live playground and customizer.
+- README rewritten: documentation index, providers table, free/local options, Demo mode, limitations.
+
 ## 1.1.0
 
 ### Added – customization
