@@ -21,6 +21,10 @@ jobs:
           node-version: 20
           registry-url: https://registry.npmjs.org/
 
+      # `npm stage` needs npm >= 11.15; Node 20 ships an older npm.
+      - name: Update npm
+        run: npm install -g npm@11
+
       - name: Install dependencies
         run: npm ci
 
@@ -32,7 +36,10 @@ jobs:
       - name: Build package
         run: npm run build
 
-      - name: Publish to npm
+      # NPM_API_KEY is a stage-only token: it uploads the release to npm's staging
+      # area. A maintainer then approves it (2FA) with:
+      #   npm stage list react-mcp-chatbot && npm stage approve <stage-id>
+      - name: Stage release on npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_API_KEY }}
-        run: npm publish --access public --provenance
+        run: npm stage publish --access public --provenance
