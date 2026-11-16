@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "types": ["vite/client"],
+    "paths": {
+      "react-mcp-chatbot": ["../src/index.tsx"],
+      "@demo/*": ["../demo/src/*"]
+    }
+  },
+  "include": ["src", "../src", "../demo/src/mockApi.ts", "../demo/src/mockLLM.ts"]
+}

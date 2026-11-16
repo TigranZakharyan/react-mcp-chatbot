@@ -9,6 +9,7 @@ export type {
   MCPToolParameter,
   MCPAgentProps,
   MCPAgentHandle,
+  MCPThemeColors,
   ApiConfig,
   ApiEndpoint,
   ApiParameter,

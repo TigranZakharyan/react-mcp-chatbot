@@ -1,0 +1,28 @@
+# Netlify config for the documentation site in ./docs
+# (the npm package itself ships only `dist/`, see "files" in package.json, so none of this is published to npm)
+
+[build]
+  base    = "docs"            # install + build inside docs/
+  command = "npm run build"   # typechecks, then `vite build`
+  publish = "dist"            # relative to `base`  ->  docs/dist
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Single-page app: serve index.html for every path so deep links like /docs/guides/providers work
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+# Hashed build assets can be cached forever
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy        = "strict-origin-when-cross-origin"

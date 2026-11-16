@@ -2,7 +2,7 @@
 
 All notable changes are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 1.1.0
 
 ### Added – customization
 - `theme="auto"` follows the visitor's OS light/dark setting.
