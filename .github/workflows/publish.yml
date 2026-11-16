@@ -5,6 +5,10 @@ on:
     tags:
       - "v*.*.*"
 
+permissions:
+  contents: read
+  id-token: write # npm provenance
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -14,11 +18,16 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           registry-url: https://registry.npmjs.org/
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Typecheck and test
+        run: |
+          npm run typecheck
+          npm test
 
       - name: Build package
         run: npm run build
@@ -26,4 +35,4 @@ jobs:
       - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_API_KEY }}
-        run: npm publish --access public
+        run: npm publish --access public --provenance

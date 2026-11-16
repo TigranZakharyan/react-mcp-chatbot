@@ -22,6 +22,8 @@ export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAg
     placeholder = "Message…",
     borderRadius = 20,
     showClearButton = true,
+    defaultOpen = false,
+    suggestions,
   } = props;
 
   const isDark = theme === "dark";
@@ -31,6 +33,7 @@ export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAg
   const {
     title: _t, align: _a, primaryColor: _p, width: _w, height: _h, theme: _th,
     buttonLabel: _b, placeholder: _ph, borderRadius: _br, showClearButton: _sc,
+    defaultOpen: _do, suggestions: _sg,
     ...config
   } = props;
   const chat = useChat(config);
@@ -54,7 +57,7 @@ export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAg
     await chat.send(text);
   }
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [input, setInput] = useState("");
   const [animateIn, setAnimateIn] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -99,6 +102,7 @@ export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAg
     .mcp-bubble-ai ul, .mcp-bubble-ai ol { margin: 4px 0; padding-left: 18px; }
     .mcp-bubble-ai li { margin: 2px 0; }
     .mcp-clear-btn:not(:disabled):hover { color: ${t.text} !important; background: ${t.surfaceHover} !important; }
+    .mcp-chip:hover:not(:disabled) { border-color: ${t.accent} !important; color: ${t.accent} !important; transform: translateY(-1px); }
     .mcp-float-btn:hover { transform: scale(1.08); box-shadow: 0 14px 36px ${primaryColor}55 !important; }
     .mcp-float-btn:active { transform: scale(0.96); }
   `;
@@ -148,8 +152,9 @@ export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAg
           position: "fixed",
           bottom: 84,
           ...side,
-          width,
-          height,
+          // never wider/taller than the viewport (phones)
+          width: `min(${width}px, calc(100vw - 32px))`,
+          height: `min(${height}px, calc(100vh - 110px))`,
           background: t.bg,
           borderRadius,
           display: "flex",
@@ -301,6 +306,31 @@ export const MCPAgent = forwardRef<MCPAgentHandle, MCPAgentProps>(function MCPAg
                 Hey there!
               </span>
               <span>How can I help you today?</span>
+              {suggestions && suggestions.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginTop: 6 }}>
+                  {suggestions.map((q) => (
+                    <button
+                      key={q}
+                      className="mcp-chip"
+                      disabled={loading}
+                      onClick={() => chat.send(q)}
+                      style={{
+                        background: t.bg,
+                        color: t.text,
+                        border: `1px solid ${t.border}`,
+                        borderRadius: 999,
+                        padding: "7px 13px",
+                        fontSize: 12.5,
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                        transition: "all .15s",
+                      }}
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

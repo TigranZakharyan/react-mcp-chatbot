@@ -13,6 +13,10 @@ export type BaseUIProps = {
   borderRadius?: number;
   /** Show the trash button in the header. Default true. */
   showClearButton?: boolean;
+  /** Start with the chat window open. Default false. */
+  defaultOpen?: boolean;
+  /** Clickable starter prompts shown in the empty chat. */
+  suggestions?: string[];
 };
 
 export type MCPAgentProps = ChatConfig & BaseUIProps;

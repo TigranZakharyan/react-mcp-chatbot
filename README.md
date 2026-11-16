@@ -5,6 +5,13 @@
   <a href="https://www.npmjs.com/package/react-mcp-chatbot">
     <img src="https://img.shields.io/npm/dm/react-mcp-chatbot" alt="npm downloads" />
   </a>
+  <a href="https://github.com/TigranZakharyan/react-mcp-chatbot/actions/workflows/ci.yml">
+    <img src="https://github.com/TigranZakharyan/react-mcp-chatbot/actions/workflows/ci.yml/badge.svg" alt="CI status" />
+  </a>
+  <a href="https://bundlephobia.com/package/react-mcp-chatbot">
+    <img src="https://img.shields.io/bundlephobia/minzip/react-mcp-chatbot" alt="minzipped size" />
+  </a>
+  <img src="https://img.shields.io/npm/types/react-mcp-chatbot" alt="TypeScript types included" />
   <a href="https://github.com/TigranZakharyan/react-mcp-chatbot/blob/main/LICENSE">
     <img src="https://img.shields.io/npm/l/react-mcp-chatbot" alt="license" />
   </a>
@@ -26,7 +33,77 @@
   Describe your existing REST endpoints. The model decides when to call them, the browser executes the calls, and the answer comes back as Markdown. History, system prompt and tool calling all live client-side.
 </p>
 
+<p align="center">
+  <a href="https://tigranzakharyan.github.io/react-mcp-chatbot/"><b>▶ Live demo</b></a> ·
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#faq">FAQ</a> ·
+  <a href="./CHANGELOG.md">Changelog</a>
+</p>
+
 <hr />
+
+## Demo
+
+<p align="center">
+  <img src="./assets/demo.gif" alt="Chatbot listing and cancelling orders through a described REST API" width="800" />
+</p>
+
+Recorded with a local `llama3.1` via Ollama (no API key, no scripted replies). The assistant lists the processing orders, asks permission before the `POST`, cancels order 1002, and the table on the page updates. Its only knowledge of the backend is the three endpoint descriptions in [`demo/src/main.tsx`](./demo/src/main.tsx).
+
+**[Try it live](https://tigranzakharyan.github.io/react-mcp-chatbot/)** – bring your own API key (it stays in your browser tab), or run it locally. The demo ships an in-browser fake orders API, so no backend is needed:
+
+```bash
+git clone https://github.com/TigranZakharyan/react-mcp-chatbot
+cd react-mcp-chatbot/demo
+npm install
+npm run dev
+```
+
+Choose a provider, paste a key (or pick `ollama` with a tool-capable model running locally) and try *"Which orders are still processing?"* or *"Cancel order 1002"*.
+
+## Why this exists
+
+Adding "chat with our app" to a product usually means building a chatbot backend: a proxy for the LLM, a tool-calling loop, session storage, and glue that re-implements the endpoints you already have. **react-mcp-chatbot removes that layer.**
+
+| Without | With react-mcp-chatbot |
+| --- | --- |
+| A server that holds the conversation and runs the tool loop | The loop, history and system prompt run in the browser |
+| Re-wrapping every REST endpoint as an LLM tool | Describe the endpoint once (or import your OpenAPI spec) |
+| Provider-specific code for each LLM vendor | One config, native function calling for 10+ providers |
+| Backend auth plumbing for the bot | Requests use the signed-in user's own credentials, so existing permissions apply |
+
+**Good fit:** admin panels, internal tools, SaaS dashboards, prototypes, local-first apps. **Not a fit:** anything that needs the LLM key to stay secret without a proxy – see [client-side caveats](#things-to-know-about-running-fully-client-side).
+
+## FAQ
+
+**How do I add an AI chatbot to my React app without writing a backend?**
+Install the package, render `<MCPAgent />` with a provider, a model and your endpoint list. See [Quick start](#quick-start).
+
+**How can an LLM call my existing REST API from the browser?**
+Each endpoint you describe (or each OpenAPI operation) is sent to the model as a function-calling tool. The model returns which one to call; the package performs the `fetch` and feeds the result back.
+
+**Does it work with a local model?**
+Yes – use `provider="ollama"` with a tool-capable model such as `llama3.1`. No API key needed.
+
+**How do I stop the bot from making destructive calls?**
+Use `beforeToolCall` to confirm or block, `include`/`exclude` to limit which OpenAPI operations are exposed, and only describe endpoints you are happy for the user to trigger.
+
+**Does it support CommonJS and ESM, with TypeScript types?**
+Both, and types are bundled.
+
+## How it compares
+
+Most chat toolkits assume a server route that runs the model and tools. This one is deliberately the opposite. A rough guide (check each project's docs – they evolve):
+
+| | react-mcp-chatbot | Server-centric chat SDKs (e.g. Vercel AI SDK `useChat`, CopilotKit runtime) |
+| --- | --- | --- |
+| Where the tool-calling loop runs | Browser | Typically your server |
+| Needs a chat backend / API route | No | Usually yes |
+| Tools defined from | REST endpoint descriptions or an OpenAPI spec, called with the user's own session | Server-side functions you write |
+| LLM key exposure | Visible to the client unless you add a proxy | Kept on the server |
+| Best for | Dashboards, internal tools, prototypes, local-first apps | Public products where the key and tools must stay private |
+
+Pick the server-centric route when secrets or business logic must not reach the browser; pick this when your existing API already enforces permissions and you just want a chat front-end for it.
 
 ## Install
 
@@ -141,7 +218,7 @@ const { messages, send, clear, stop, loading, status } = useChat({ provider, mod
 | `beforeToolCall` | `({name, args, method}) => boolean \| Promise<boolean>` – return `false` to block. Use it to confirm writes. |
 | `onToolCall`, `onError` | Observability hooks. |
 | `temperature`, `headers` | Passed to the provider. |
-| UI | `title`, `align`, `theme`, `primaryColor`, `width`, `height`, `borderRadius`, `placeholder`, `buttonLabel`, `showClearButton` |
+| UI | `title`, `align`, `theme`, `primaryColor`, `width`, `height`, `borderRadius`, `placeholder`, `buttonLabel`, `showClearButton`, `defaultOpen`, `suggestions` (clickable starter prompts) |
 
 ## Things to know about running fully client-side
 
@@ -149,6 +226,19 @@ const { messages, send, clear, stop, loading, status } = useChat({ provider, mod
 - **The assistant acts with the user's own credentials.** Tool calls are plain `fetch` calls from the browser, so your backend's normal auth, CORS and permissions apply. Expose only the endpoints you want the model to reach, and use `beforeToolCall` to confirm mutating calls.
 - **CORS**: your backend must allow the page's origin; so must the LLM provider (OpenAI, Anthropic, Gemini, Groq work from browsers; for Ollama set `OLLAMA_ORIGINS`).
 - Models must support tool calling (e.g. Ollama `llama3.1`+, not every local model does).
+
+## Contributing
+
+Issues and PRs are welcome. To work on the package:
+
+```bash
+git clone https://github.com/TigranZakharyan/react-mcp-chatbot
+cd react-mcp-chatbot && npm install
+npm test          # unit tests (mocked providers, no keys needed)
+cd demo && npm install && npm run dev
+```
+
+Ideas that would make good first contributions: response streaming, a Vue / vanilla-JS wrapper around `ChatEngine`, a per-endpoint `confirm` flag, markdown theming props, and more provider tests. See the [CHANGELOG](./CHANGELOG.md) for what changed between versions.
 
 ## License
 

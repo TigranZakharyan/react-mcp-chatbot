@@ -1,25 +1,35 @@
 {
   "name": "react-mcp-chatbot",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Client-side AI chatbot for React: describe your backend APIs and the model calls them. OpenAI, Anthropic, Gemini, DeepSeek, Groq, Ollama and more.",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsup src/index.tsx --format esm --dts --clean",
-    "dev": "tsup src/index.tsx --watch",
-    "prepublishOnly": "npm run build"
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
     "react": ">=18",
@@ -33,7 +43,8 @@
     "@types/react": "^19.2.10",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "vitest": "^5.1.0"
   },
   "license": "MIT",
   "keywords": [
@@ -64,11 +75,12 @@
     "type": "git",
     "url": "https://github.com/TigranZakharyan/react-mcp-chatbot"
   },
-  "homepage": "https://github.com/TigranZakharyan/react-mcp-chatbot#readme",
+  "homepage": "https://tigranzakharyan.github.io/react-mcp-chatbot/",
   "bugs": {
     "url": "https://github.com/TigranZakharyan/react-mcp-chatbot/issues"
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "module": "dist/index.js"
 }

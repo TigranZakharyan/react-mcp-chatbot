@@ -197,6 +197,7 @@ export function endpointsFromOpenAPI(rawDoc: any): ApiEndpoint[] {
       const method = m.toUpperCase() as HttpMethod;
       let name = String(op.operationId ?? `${m}_${path}`)
         .replace(/[^a-zA-Z0-9_-]+/g, "_")
+        .replace(/_+/g, "_")
         .replace(/^_+|_+$/g, "")
         .slice(0, 64);
       for (let i = 2; used.has(name); i++) name = `${name.slice(0, 60)}_${i}`;
