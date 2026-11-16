@@ -69,4 +69,4 @@ The repository root has a `netlify.toml` that does everything:
 2. Leave the build settings as detected (they are read from `netlify.toml`): base `docs`, command `npm run build`, publish `dist`.
 3. Deploy. Every push to `main` redeploys.
 
-Deep links work because of the SPA redirect in `netlify.toml`. After the first deploy, put the site URL in the repo's **About → Website** field and in the root `package.json` `homepage`.
+Deep links work because of the SPA redirect in `netlify.toml`. The live site is https://react-mcp-chatbot.netlify.app/ (also set as `homepage` in the root `package.json`).

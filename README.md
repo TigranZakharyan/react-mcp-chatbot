@@ -34,8 +34,8 @@
 </p>
 
 <p align="center">
-  <a href="https://tigranzakharyan.github.io/react-mcp-chatbot/"><b>▶ Live demo</b></a> ·
-  <a href="#documentation">Documentation</a> ·
+  <a href="https://react-mcp-chatbot.netlify.app/playground"><b>▶ Live demo</b></a> ·
+  <a href="https://react-mcp-chatbot.netlify.app/docs/getting-started/installation">Documentation</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#faq">FAQ</a> ·
   <a href="./CHANGELOG.md">Changelog</a>
@@ -51,7 +51,7 @@
 
 Recorded with a local `llama3.1` via Ollama (no API key, no scripted replies). The assistant lists the processing orders, asks permission before the `POST`, cancels order 1002, and the table on the page updates. Its only knowledge of the backend is the three endpoint descriptions in [`demo/src/main.tsx`](./demo/src/main.tsx).
 
-**[Try it live](https://tigranzakharyan.github.io/react-mcp-chatbot/)** – it opens in **Demo mode**: a simulated, rule-based model with no key, no cost and no AI, so you can see the UI and the tool loop work immediately. Switch to a real provider by pasting your own API key (it stays in your browser tab); Ollama and the free tiers of providers like Groq and Gemini work too. The demo ships an in-browser fake orders API, so no backend is needed. To run it yourself:
+**[Try it live](https://react-mcp-chatbot.netlify.app/playground)** – it opens in **Demo mode**: a simulated, rule-based model with no key, no cost and no AI, so you can see the UI and the tool loop work immediately. Switch to a real provider by pasting your own API key (it stays in your browser tab); Ollama and the free tiers of providers like Groq and Gemini work too. The demo ships an in-browser fake orders API, so no backend is needed. To run it yourself:
 
 ```bash
 git clone https://github.com/TigranZakharyan/react-mcp-chatbot
@@ -186,7 +186,7 @@ tools={[{
 
 The model must support **tool calling**. Override any base URL with `providerURL` – for example to route through your own proxy.
 
-**Don't want to pay?** Use **Ollama** (free, runs on your machine), the key-free Demo mode in the [live demo](https://tigranzakharyan.github.io/react-mcp-chatbot/), or a provider's free tier if it offers one (limits change – check theirs).
+**Don't want to pay?** Use **Ollama** (free, runs on your machine), the key-free Demo mode in the [live demo](https://react-mcp-chatbot.netlify.app/playground), or a provider's free tier if it offers one (limits change – check theirs).
 
 ## History, system prompt, clearing
 
@@ -246,7 +246,7 @@ const ref = useRef<MCPAgentHandle>(null);
 | Behaviour | `defaultOpen`, `open`, `onOpenChange`, `showLauncher`, `showClearButton` |
 | Content | `markdownComponents` |
 
-`colors` accepts: `bg`, `surface`, `surfaceHover`, `border`, `text`, `textMuted`, `accent`, `accentHover`, `userBubble`, `userBubbleText`, `aiBubble`, `aiBubbleText`, `inputBg`, `inputBorder`, `inputFocus`, `scrollbar`, `scrollbarThumb`, `shadow`, `headerGlow`, `codeBg`, `codeText`, `preBg`, `tableHeadBg` (type exported as `MCPThemeColors`). Try every option live in the [demo](https://tigranzakharyan.github.io/react-mcp-chatbot/).
+`colors` accepts: `bg`, `surface`, `surfaceHover`, `border`, `text`, `textMuted`, `accent`, `accentHover`, `userBubble`, `userBubbleText`, `aiBubble`, `aiBubbleText`, `inputBg`, `inputBorder`, `inputFocus`, `scrollbar`, `scrollbarThumb`, `shadow`, `headerGlow`, `codeBg`, `codeText`, `preBg`, `tableHeadBg` (type exported as `MCPThemeColors`). Try every option live in the [customizer](https://react-mcp-chatbot.netlify.app/docs/guides/customization).
 
 ## Headless usage
 
@@ -288,7 +288,7 @@ Build any UI on top. `ChatEngine` (the same core, no React code) is exported too
 
 ## Documentation
 
-Guides, examples and the full API reference live in [`docs/`](./docs) – a React site (deploy instructions in [`docs/README.md`](./docs/README.md)) whose pages are plain Markdown you can read right here:
+**Read the docs at [react-mcp-chatbot.netlify.app](https://react-mcp-chatbot.netlify.app)** – guides, examples, the full API reference, search and a live playground. The site is generated from plain Markdown in [`docs/`](./docs), so you can also read every page right here:
 
 | | |
 | --- | --- |
@@ -298,7 +298,7 @@ Guides, examples and the full API reference live in [`docs/`](./docs) – a Reac
 | **Reference** | [`<MCPAgent />` props](./docs/src/content/reference/mcpagent-props.md) · [Engine options](./docs/src/content/reference/chat-config.md) · [API & tool config](./docs/src/content/reference/api-config.md) · [Hooks & engine](./docs/src/content/reference/hooks-and-engine.md) · [Exports & TypeScript](./docs/src/content/reference/exports.md) |
 | **Help** | [FAQ](./docs/src/content/help/faq.md) · [Troubleshooting](./docs/src/content/help/troubleshooting.md) · [Migrating from 0.0.x](./docs/src/content/help/migrating.md) |
 
-To read it as a website with search and a live playground: `cd docs && npm install && npm run dev`.
+To run the site locally: `cd docs && npm install && npm run dev`.
 
 ## How it compares
 

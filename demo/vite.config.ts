@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import path from "node:path";
 
 export default defineConfig({
-  // relative base so the build works on GitHub Pages sub-paths
+  // relative base so the built demo works from any sub-path or static host
   base: "./",
   plugins: [react()],
   resolve: {

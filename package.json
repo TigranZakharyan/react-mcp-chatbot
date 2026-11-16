@@ -75,7 +75,7 @@
     "type": "git",
     "url": "https://github.com/TigranZakharyan/react-mcp-chatbot"
   },
-  "homepage": "https://tigranzakharyan.github.io/react-mcp-chatbot/",
+  "homepage": "https://react-mcp-chatbot.netlify.app/",
   "bugs": {
     "url": "https://github.com/TigranZakharyan/react-mcp-chatbot/issues"
   },
